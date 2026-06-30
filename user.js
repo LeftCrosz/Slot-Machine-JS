@@ -29,4 +29,13 @@ export class User {
         }
         this.#balance += amount;
     }
+
+    toJSON() {
+        const data = {
+            name: this.#name,
+            balance: this.#balance
+        }
+        return data;
+    }
+
 }

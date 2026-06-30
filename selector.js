@@ -1,0 +1,44 @@
+import PromptSync from "prompt-sync";
+import * as slotmachine from "./slotmachine.js";
+const prompt = PromptSync();
+
+// Display main menu
+export async function displayMenu() {
+    while (true) {
+        console.log(`
+        ░██████╗██╗░░░░░░█████╗░████████╗███╗░░░███╗░█████╗░░█████╗░██╗░░██╗██╗███╗░░██╗███████╗
+        ██╔════╝██║░░░░░██╔══██╗╚══██╔══╝████╗░████║██╔══██╗██╔══██╗██║░░██║██║████╗░██║██╔════╝
+        ╚█████╗░██║░░░░░██║░░██║░░░██║░░░██╔████╔██║███████║██║░░╚═╝███████║██║██╔██╗██║█████╗░░
+        ░╚═══██╗██║░░░░░██║░░██║░░░██║░░░██║╚██╔╝██║██╔══██║██║░░██╗██╔══██║██║██║╚████║██╔══╝░░
+        ██████╔╝███████╗╚█████╔╝░░░██║░░░██║░╚═╝░██║██║░░██║╚█████╔╝██║░░██║██║██║░╚███║███████╗
+        ╚═════╝░╚══════╝░╚════╝░░░░╚═╝░░░╚═╝░░░░░╚═╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚═╝╚═╝░░╚══╝╚══════╝
+
+
+        1. Create an Account
+        2. Topup balance
+        3. Play Game
+        4. Quit
+    `);
+        const optionPrompt = prompt("Enter your option: ");
+        const option = parseInt(optionPrompt);
+
+        if (isNaN(option) || option > 4 || option < 1) {
+            console.log("Invalid option please try again")
+        } else {
+            switch(option) {
+                case 1:
+                    const newUser = slotmachine.createUser();
+                    await slotmachine.writeFile(newUser);
+                    break;
+                case 2:
+                    slotmachine.topup();
+                    break;
+                case 3:
+                    slotmachine.playGame();
+                    break;
+                case 4:
+                    process.exit(0);
+            };
+        }
+    }
+}
