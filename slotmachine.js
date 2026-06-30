@@ -1,9 +1,7 @@
-const prompt = require("prompt-sync")();
+import promptSync from 'prompt-sync';
+const prompt = promptSync();
 
-// Get bet amount
-// Get bet number betw 1-10 number
-// Roll between 1-10 number
-// Win if rollnum = betnum
+import { User } from './user.js';
 
 // Place bet
 const placeBet = () => {
