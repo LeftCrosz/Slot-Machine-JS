@@ -33,9 +33,9 @@ export async function displayMenu() {
                     }
                     break;
                 case 2:
-                    const newAccountJSON = slotmachine.register();
+                    const newAccount = slotmachine.register();
                     const regUser = await slotmachine.readFile();
-                    const createAcc = await slotmachine.createUser(newAccountJSON, regUser)
+                    const createAcc = await slotmachine.createUser(newAccount, regUser)
                     break;
                 case 3:
                     process.exit(0);
@@ -48,7 +48,7 @@ export async function displayMenu() {
 
 
 // Display Options Menu
-export async function displayOptions(userFound) {
+const displayOptions = (userFound) => {
     while (true) {
         console.log(`
         ░██████╗██╗░░░░░░█████╗░████████╗███╗░░░███╗░█████╗░░█████╗░██╗░░██╗██╗███╗░░██╗███████╗

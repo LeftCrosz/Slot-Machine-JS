@@ -6,6 +6,23 @@ import fs from 'fs/promises';
 import { User } from './user.js';
 import * as selector from './selector.js';
 
+
+
+// Read JSON File
+export async function readFile() {
+    try {
+        // Read JSON File
+        const JSONString = await fs.readFile("./user.json", "utf8");
+
+        // Parse data into JavaScript Object
+        const JSONData = JSON.parse(JSONString);
+
+        return JSONData;
+    } catch(err) {
+        console.log("Error reading files: ", err);
+    }
+}
+
 export const login = () => {
     while(true) {
         const name = prompt("Enter your game name: ");
@@ -31,22 +48,8 @@ export const validateUser = (loginName, JSONData) => {
         // Object Destructing
         const { name, balance } = targetUser;
         console.log(`User: ${name} is found with Balance of RM${balance}`);
-        return { name, balance };
-    }
-}
-
-// Read JSON File
-export async function readFile() {
-    try {
-        // Read JSON File
-        const JSONString = await fs.readFile("./user.json", "utf8");
-
-        // Parse data into JavaScript Object
-        const JSONData = JSON.parse(JSONString);
-
-        return JSONData;
-    } catch(err) {
-        console.log("Error reading files: ", err);
+        const player = new User(name, balance);
+        return player;
     }
 }
 
@@ -59,18 +62,17 @@ export const register = () => {
             console.log("Invalid name, try again!");
         } else {
             const nameUpper = name.charAt(0).toUpperCase() + name.slice(1);
-            const newAccount = new User(nameUpper, 0);
-
-            // Access to User Object
-            const newAccountJSON = newAccount.toJSON();
-            return newAccountJSON;
+            const player = new User(nameUpper, 0);
+            return player;
         }
     }
 }
 
 
 // User account creation
-export async function createUser (newAccountJSON, JSONData) {
+export async function createUser (newAccount, JSONData) {
+    // Access to User Object
+    const newAccountJSON = newAccount.toJSON();
     const addAccount = newAccountJSON;
 
     // Add new user into the array
@@ -87,17 +89,22 @@ export async function createUser (newAccountJSON, JSONData) {
 }
 
 
-
-
 // Place bet
-const placeBet = () => {
+const placeBet = (player) => {
     while (true) {
         const bet = prompt("Enter your bet amount (RM): ");
         const betAmount = parseFloat(bet);
         if (isNaN(betAmount) || betAmount < 0) {
             console.log("Invalid bet amount, try again!");
         } else {
-            return betAmount;
+            if (player.balance < betAmount) {
+                console.log("You have insufficient money. Go work!");
+            } else {
+                player.subtractBalance(betAmount);
+                console.log(`You spent ${betAmount}. Your new balance: ${player.balance}`);
+                return { player, betAmount };
+            }
+            
         }
     }
 }
@@ -116,34 +123,36 @@ const enterBetNum = () => {
 }
 
 // Roll number between 1-10
-export const rollslot = () => {
+const rollslot = () => {
     // random integer 0-9 then + 1 for 1-10
     const slotNum = Math.floor(Math.random() * 10) + 1;
     return slotNum;
 }
 
 
-// Validate player's game
-const calcGame = (player, betAmount, betNum, slotNum) => {
+// Calc player's game
+const calcGame = (playerUpdate, betAmount, betNum, slotNum) => {
     if (betNum == slotNum) {
         const winAmount = betAmount * 2;
-        user1.addBalance(winAmount);
-        console.log(`Rolled number is... ${slotNum}!`)
-        console.log(`Congratulations! ${player.name} won a total of RM${winAmount} from the Slot Machine :)`);
+        playerUpdate.addBalance(winAmount);
+        console.log(`Rolled number is... ${slotNum}!`);
+        console.log(`Congratulations! ${playerUpdate.name} won a total of RM${winAmount} from the Slot Machine :)`);
         console.log(`Your bet amount: RM${betAmount}`);
+        console.log(`Your new balance is RM${playerUpdate.balance}`);
     } else {
-        console.log(`Rolled number is... ${slotNum}!`)
-        console.log(`Awww ${player.name}, you lost RM${betAmount}!`)
+        console.log(`Rolled number is... ${slotNum}!`);
+        console.log(`Awww ${playerUpdate.name}, you lost RM${betAmount}!`);
+        console.log(`Your current balance is RM${playerUpdate.balance}`);
     }
 }
 
 // Play Game
 export const playGame = (player) => {
-    let betAmount = placeBet();
+    let { player: playerUpdate, betAmount } = placeBet(player);
     let betNum = enterBetNum();
     let slotNum = rollslot();
-    calcGame(player, betAmount, betNum, slotNum);
+    calcGame(playerUpdate, betAmount, betNum, slotNum);
 }
 
-
+// Start
 selector.displayMenu();

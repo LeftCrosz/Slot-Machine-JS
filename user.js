@@ -18,16 +18,23 @@ export class User {
 
     set balance(newBalance) {
         if (typeof newBalance !== "number" || isNaN(newBalance)) {
-            console.log("Balance must be valid number.")
+            console.log("Balance must be valid number.");
         }
         this.#balance = newBalance;
     }
 
     addBalance(amount) {
         if (typeof amount !== "number" || isNaN(amount) || amount <= 0) {
-            console.log("Amount must be valid number.")
+            console.log("Amount must be valid number.");
         }
         this.#balance += amount;
+    }
+
+    subtractBalance(amount) {
+        if(typeof amount !== "number" || isNaN(amount) || amount <= 0) {
+            console.log("Invalid amount to deduct!");
+        }
+        this.#balance -= amount;
     }
 
     toJSON() {
