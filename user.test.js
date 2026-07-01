@@ -11,3 +11,9 @@ test('addBalance rejects negative amounts', () => {
     player.addBalance(-50);
     expect(player.balance).toBe(100);
 });
+
+test('deductBalance rejects negative amounts', () => {
+    const player = new User('Test', 100);
+    player.subtractBalance(-50);
+    expect(player.balance).toBe(100);
+});
