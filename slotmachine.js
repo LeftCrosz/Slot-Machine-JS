@@ -6,9 +6,53 @@ import fs from 'fs/promises';
 import { User } from './user.js';
 import * as selector from './selector.js';
 
+export const login = () => {
+    while(true) {
+        const name = prompt("Enter your game name: ");
+        if (name == "") {
+            console.log("Invalid name, try again!");
+        } else {
+            const loginName = name.charAt(0).toUpperCase() + name.slice(1);
+            return loginName;
+        }
+    }
+}
+
+// Validate User
+export const validateUser = (loginName, JSONData) => {
+    const username = loginName
+    // Find user
+    const targetUser = JSONData.users.find(user => user.name == `${username}`);
+    
+    if(targetUser == undefined) {
+        console.log("Username not found, try again!");
+        return null;
+    } else {
+        // Object Destructing
+        const { name, balance } = targetUser;
+        console.log(`User: ${name} is found with Balance of RM${balance}`);
+        return { name, balance };
+    }
+}
+
+// Read JSON File
+export async function readFile() {
+    try {
+        // Read JSON File
+        const JSONString = await fs.readFile("./user.json", "utf8");
+
+        // Parse data into JavaScript Object
+        const JSONData = JSON.parse(JSONString);
+
+        return JSONData;
+    } catch(err) {
+        console.log("Error reading files: ", err);
+    }
+}
+
 
 // User account creation
-export const createUser = () => {
+export const register = () => {
     while (true) {
         const name = prompt("Enter your name: ");
         if (name == "" || name.match(/[0-9]/)) {
@@ -24,30 +68,22 @@ export const createUser = () => {
     }
 }
 
-// Add New User to JSON file
-export async function writeFile(newAccountJSON) {
-    try {
-        
-        const addAccount = newAccountJSON;
-        // Read JSON file
-        const JSONString = await fs.readFile('./user.json', 'utf8');
 
-        // Parse data into Javascript Object
-        const JSONData = JSON.parse(JSONString);
+// User account creation
+export async function createUser (newAccountJSON, JSONData) {
+    const addAccount = newAccountJSON;
 
-        // Add new user into the array
-        JSONData.users.push(addAccount);
+    // Add new user into the array
+    JSONData.users.push(addAccount);
 
-        // Stringify the data
-        const newJSONString = JSON.stringify(JSONData, null, 2);
+    // Stringify the data
+    const newJSONString = JSON.stringify(JSONData, null, 2);
 
-        // Write the file
-        await fs.writeFile('user.json', newJSONString);
+    // Write the file
+    await fs.writeFile('user.json', newJSONString);
 
-        console.log(`User account created successfully!`);
-    } catch (err) {
-        console.error("Error writing files:", err);
-    }
+    console.log(`User account created successfully!`);
+
 }
 
 
@@ -88,25 +124,25 @@ export const rollslot = () => {
 
 
 // Validate player's game
-const calcGame = (betAmount, betNum, slotNum) => {
+const calcGame = (player, betAmount, betNum, slotNum) => {
     if (betNum == slotNum) {
         const winAmount = betAmount * 2;
         user1.addBalance(winAmount);
         console.log(`Rolled number is... ${slotNum}!`)
-        console.log(`Congratulations! ${user1.name} won a total of RM${winAmount} from the Slot Machine :)`);
+        console.log(`Congratulations! ${player.name} won a total of RM${winAmount} from the Slot Machine :)`);
         console.log(`Your bet amount: RM${betAmount}`);
     } else {
         console.log(`Rolled number is... ${slotNum}!`)
-        console.log(`Awww ${user1.name}, you lost RM${betAmount}!`)
+        console.log(`Awww ${player.name}, you lost RM${betAmount}!`)
     }
 }
 
 // Play Game
-export const playGame = () => {
+export const playGame = (player) => {
     let betAmount = placeBet();
     let betNum = enterBetNum();
     let slotNum = rollslot();
-    calcGame(betAmount, betNum, slotNum);
+    calcGame(player, betAmount, betNum, slotNum);
 }
 
 

@@ -13,31 +13,72 @@ export async function displayMenu() {
         ██████╔╝███████╗╚█████╔╝░░░██║░░░██║░╚═╝░██║██║░░██║╚█████╔╝██║░░██║██║██║░╚███║███████╗
         ╚═════╝░╚══════╝░╚════╝░░░░╚═╝░░░╚═╝░░░░░╚═╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚═╝╚═╝░░╚══╝╚══════╝
 
-
-        1. Create an Account
-        2. Topup balance
-        3. Play Game
-        4. Quit
+        1. Login
+        2. Register an Account
+        3. Quit 
     `);
         const optionPrompt = prompt("Enter your option: ");
         const option = parseInt(optionPrompt);
 
-        if (isNaN(option) || option > 4 || option < 1) {
+        if (isNaN(option) || option > 3 || option < 1) {
+            console.log("Invalid option please try again")
+    } else {
+            switch(option) {
+                case 1:
+                    const loginName = slotmachine.login();
+                    const findUser = await slotmachine.readFile();
+                    const userFound = slotmachine.validateUser(loginName, findUser);
+                    if(userFound != undefined) {
+                        displayOptions(userFound);
+                    }
+                    break;
+                case 2:
+                    const newAccountJSON = slotmachine.register();
+                    const regUser = await slotmachine.readFile();
+                    const createAcc = await slotmachine.createUser(newAccountJSON, regUser)
+                    break;
+                case 3:
+                    process.exit(0);
+                    break;
+                default:
+            };
+        }
+    }
+}
+
+
+// Display Options Menu
+export async function displayOptions(userFound) {
+    while (true) {
+        console.log(`
+        ░██████╗██╗░░░░░░█████╗░████████╗███╗░░░███╗░█████╗░░█████╗░██╗░░██╗██╗███╗░░██╗███████╗
+        ██╔════╝██║░░░░░██╔══██╗╚══██╔══╝████╗░████║██╔══██╗██╔══██╗██║░░██║██║████╗░██║██╔════╝
+        ╚█████╗░██║░░░░░██║░░██║░░░██║░░░██╔████╔██║███████║██║░░╚═╝███████║██║██╔██╗██║█████╗░░
+        ░╚═══██╗██║░░░░░██║░░██║░░░██║░░░██║╚██╔╝██║██╔══██║██║░░██╗██╔══██║██║██║╚████║██╔══╝░░
+        ██████╔╝███████╗╚█████╔╝░░░██║░░░██║░╚═╝░██║██║░░██║╚█████╔╝██║░░██║██║██║░╚███║███████╗
+        ╚═════╝░╚══════╝░╚════╝░░░░╚═╝░░░╚═╝░░░░░╚═╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚═╝╚═╝░░╚══╝╚══════╝
+
+        1. Play Game
+        2. Topup Balance
+        3. Quit
+    `);
+        const optionPrompt = prompt("Enter your option: ");
+        const option = parseInt(optionPrompt);
+
+        if (isNaN(option) || option > 3 || option < 1) {
             console.log("Invalid option please try again")
         } else {
             switch(option) {
                 case 1:
-                    const newUser = slotmachine.createUser();
-                    await slotmachine.writeFile(newUser);
+                    const player = userFound;
+                    slotmachine.playGame(player);
                     break;
                 case 2:
                     slotmachine.topup();
                     break;
                 case 3:
-                    slotmachine.playGame();
-                    break;
-                case 4:
                     process.exit(0);
+                    break;
             };
         }
     }
