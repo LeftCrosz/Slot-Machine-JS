@@ -4,25 +4,12 @@ const prompt = promptSync();
 import fs from 'fs/promises';
 
 import { User } from './user.js';
-import * as selector from './selector.js';
+import { displayMenu } from './selector.js';
 
 
 
-// Read JSON File
-export async function readFile() {
-    try {
-        // Read JSON File
-        const JSONString = await fs.readFile("./user.json", "utf8");
 
-        // Parse data into JavaScript Object
-        const JSONData = JSON.parse(JSONString);
-
-        return JSONData;
-    } catch(err) {
-        console.log("Error reading files: ", err);
-    }
-}
-
+// Login
 export const login = () => {
     while(true) {
         const name = prompt("Enter your game name: ");
@@ -89,19 +76,20 @@ export async function createUser (newAccount, JSONData) {
 }
 
 
+
 // Place bet
 const placeBet = (player) => {
     while (true) {
         const bet = prompt("Enter your bet amount (RM): ");
         const betAmount = parseFloat(bet);
-        if (isNaN(betAmount) || betAmount < 0) {
+        if (isNaN(betAmount) || betAmount <= 0) {
             console.log("Invalid bet amount, try again!");
         } else {
             if (player.balance < betAmount) {
                 console.log("You have insufficient money. Go work!");
             } else {
                 player.subtractBalance(betAmount);
-                console.log(`You spent ${betAmount}. Your new balance: ${player.balance}`);
+                console.log(`You spent RM${betAmount}. Your new balance: RM${player.balance}`);
                 return { player, betAmount };
             }
             
@@ -131,28 +119,94 @@ const rollslot = () => {
 
 
 // Calc player's game
-const calcGame = (playerUpdate, betAmount, betNum, slotNum) => {
+async function calcGame (playerUpdate, betAmount, betNum, slotNum) {
     if (betNum == slotNum) {
         const winAmount = betAmount * 2;
         playerUpdate.addBalance(winAmount);
+
         console.log(`Rolled number is... ${slotNum}!`);
         console.log(`Congratulations! ${playerUpdate.name} won a total of RM${winAmount} from the Slot Machine :)`);
         console.log(`Your bet amount: RM${betAmount}`);
         console.log(`Your new balance is RM${playerUpdate.balance}`);
+
+        await saveData(playerUpdate);
+        return playerUpdate;
     } else {
         console.log(`Rolled number is... ${slotNum}!`);
         console.log(`Awww ${playerUpdate.name}, you lost RM${betAmount}!`);
         console.log(`Your current balance is RM${playerUpdate.balance}`);
+
+        await saveData(playerUpdate);
+        return playerUpdate;
     }
 }
 
 // Play Game
-export const playGame = (player) => {
+export async function playGame (player) {
     let { player: playerUpdate, betAmount } = placeBet(player);
     let betNum = enterBetNum();
     let slotNum = rollslot();
-    calcGame(playerUpdate, betAmount, betNum, slotNum);
+    await calcGame(playerUpdate, betAmount, betNum, slotNum);
+}
+
+
+
+// Topup balance
+export async function topup (player) {
+    while(true) {
+        const topup = prompt("Enter the amount you want to topup (RM): ");
+        const topupAmount = parseFloat(topup);
+
+        if(isNaN(topupAmount) || topupAmount <= 0 ) {
+            console.log("Invalid topup amount!");
+        } else {
+            player.addBalance(topupAmount);
+            console.log(`Successfully topup RM${topupAmount} to your balance!\nNew balance: RM${player.balance}`);
+            await saveData(player);
+            return topupAmount;
+        }
+    }
+}
+
+// Save Data
+async function saveData(player) {
+    try {
+        const username = player.name;
+
+        const JSONData = await readFile();
+
+        const targetUser = JSONData.users.find(user => user.name == `${username}`);
+        if (!targetUser) {
+            console.log("User not found in saved data!");
+            return;
+        }
+        targetUser.balance = player.balance;
+        
+        // Stringify the data
+        const newJSONString = JSON.stringify(JSONData, null, 2);
+
+        await fs.writeFile('user.json', newJSONString);
+        console.log("Saved data successfully!");
+    } catch(err) {
+        console.log("Error when saving data: ", err);
+    }
+}
+
+
+// Read JSON File
+export async function readFile() {
+    try {
+        // Read JSON File
+        const JSONString = await fs.readFile("./user.json", "utf8");
+
+        // Parse data into JavaScript Object
+        const JSONData = JSON.parse(JSONString);
+
+        return JSONData;
+    } catch(err) {
+        console.log("Error reading files: ", err);
+    }
 }
 
 // Start
-selector.displayMenu();
+await displayMenu();

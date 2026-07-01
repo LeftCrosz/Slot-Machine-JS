@@ -29,7 +29,7 @@ export async function displayMenu() {
                     const findUser = await slotmachine.readFile();
                     const userFound = slotmachine.validateUser(loginName, findUser);
                     if(userFound != undefined) {
-                        displayOptions(userFound);
+                        await displayOptions(userFound);
                     }
                     break;
                 case 2:
@@ -48,7 +48,7 @@ export async function displayMenu() {
 
 
 // Display Options Menu
-const displayOptions = (userFound) => {
+async function displayOptions (userFound) {
     while (true) {
         console.log(`
         ░██████╗██╗░░░░░░█████╗░████████╗███╗░░░███╗░█████╗░░█████╗░██╗░░██╗██╗███╗░░██╗███████╗
@@ -60,23 +60,26 @@ const displayOptions = (userFound) => {
 
         1. Play Game
         2. Topup Balance
-        3. Quit
+        3. Go back
+        4. Quit
     `);
         const optionPrompt = prompt("Enter your option: ");
         const option = parseInt(optionPrompt);
 
-        if (isNaN(option) || option > 3 || option < 1) {
+        if (isNaN(option) || option > 4 || option < 1) {
             console.log("Invalid option please try again")
         } else {
             switch(option) {
                 case 1:
-                    const player = userFound;
-                    slotmachine.playGame(player);
+                    await slotmachine.playGame(userFound);
                     break;
                 case 2:
-                    slotmachine.topup();
+                    await slotmachine.topup(userFound);
                     break;
                 case 3:
+                    await displayMenu();
+                    break;
+                case 4:
                     process.exit(0);
                     break;
             };
